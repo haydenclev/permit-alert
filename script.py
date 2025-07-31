@@ -9,7 +9,7 @@ EMAIL_ALERTS = True
 EMAIL_FROM = "hayden.util@gmail.com"
 EMAIL_TO = "hayden.clev@gmail.com"
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
-START_DATE = "2025-08-29"
+START_DATE = "2025-08-30"
 MIN_COUNT = 3
 TH_MAPPING = {
     "Mono Meadow": "44585929",
