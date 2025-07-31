@@ -32,7 +32,7 @@ def check_availability(url):
     available = []
     for name, code in TH_MAPPING.items():
         remaining = data[START_DATE][code]["quota_usage_by_member_daily"]["remaining"]
-        if remaining > 0:
+        if remaining > 2:
             available.append((name, remaining))
 
     return available
