@@ -1,9 +1,7 @@
 name: Check Permit Availability
 
 on:
-  workflow_dispatch:        # Manual trigger for testing
-  schedule:
-    - cron: '* * * * *'     # Every minute (5min limit by Github)
+  workflow_dispatch:        # Manual trigger for GitHub UI and POST requests
 
 jobs:
   run-script:
