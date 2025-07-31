@@ -1,0 +1,24 @@
+# Permit Alert
+
+This repo is to automate checking for wilderness permits via Recreation.gov
+
+## Configuration
+
+Edit the following fields in `script.py` to configure your alert:
+- URL: edit the `start_date` and `end_date` fields for your desired timeframe. Note that the API seems to only accept entire month blocks.
+- START_DATE: the day you wish to begin your hike
+- MIN_COUNT: the minimum number of permits you want to alert for.
+- TH_MAPPING: the trailheads you would like to check. Retrieve this mapping from the recreation.gov website `features.json` network call.
+
+## Scheduling
+
+Github Actions claims that they provide scheduling at 5min intervals, but in practice this is unreliable and can have gaps in execution in excess of one hour. Instead, it is best to use a free online cron job scheduler such as cron-job.org to manually trigger the action via a POST call. A writeup on how to achieve this can be acccessed [here](https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event).
+
+The example `curl` command below can be translated into cron-job UI:
+```
+curl -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: token ${GITHUB_PAT}" \
+  https://api.github.com/repos/haydenclev/permit-alert/actions/workflows/schedule.yml/dispatches \
+  -d '{"ref": "main"}'
+```
