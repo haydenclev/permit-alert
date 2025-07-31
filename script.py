@@ -3,12 +3,14 @@ import requests
 import smtplib
 from email.message import EmailMessage
 
-URL = "https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false"
+API_URL = "https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false"
+BOOKING_URL = "https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit"
 EMAIL_ALERTS = True
 EMAIL_FROM = "hayden.util@gmail.com"
 EMAIL_TO = "hayden.clev@gmail.com"
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
 START_DATE = "2025-08-29"
+MIN_COUNT = 3
 TH_MAPPING = {
     "Mono Meadow": "44585929",
     "Ostrander (Lost Bear Meadow)": "44585934"
@@ -33,7 +35,7 @@ def check_availability(url):
     available = []
     for name, code in TH_MAPPING.items():
         remaining = data[START_DATE][code]["quota_usage_by_member_daily"]["remaining"]
-        if remaining > 2:
+        if remaining >= MIN_COUNT:
             available.append((name, remaining))
 
     return available
@@ -47,7 +49,7 @@ def send_email_alert(permits):
     body = "The following permits are available:\n\n"
     for trailhead, available in permits:
         body += f"- {trailhead}: {available} permits available\n"
-    body += "\nBook permits here: https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit"
+    body += "\nBook permits here: " + BOOKING_URL
     
     msg.set_content(body)
 
@@ -60,7 +62,7 @@ def send_email_alert(permits):
         print(f"Failed to send email: {e}")
 
 if __name__ == "__main__":
-    available = check_availability(URL)
+    available = check_availability(API_URL)
     if available:
         print("Permits available:", available)
         if EMAIL_ALERTS:
