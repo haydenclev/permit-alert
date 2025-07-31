@@ -12,7 +12,7 @@ Edit the following fields in `script.py` to configure your alert:
 
 ## Scheduling
 
-Github Actions claims that they provide scheduling at 5min intervals, but in practice this is unreliable and can have gaps in execution in excess of one hour. Instead, it is best to use a free online cron job scheduler such as cron-job.org to manually trigger the action via a POST call. A writeup on how to achieve this can be acccessed [here](https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event).
+Github Actions claims that they provide scheduling at 5min intervals, but in practice this is unreliable and can have gaps in execution in excess of one hour. Instead, it is best to use a free online cron job scheduler such as [cron-job.org](cron-job.org) to manually trigger the action via a POST call. A writeup on how to achieve this can be acccessed [here](https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event).
 
 The example `curl` command below can be translated into cron-job UI:
 ```
@@ -22,3 +22,9 @@ curl -X POST \
   https://api.github.com/repos/haydenclev/permit-alert/actions/workflows/schedule.yml/dispatches \
   -d '{"ref": "main"}'
 ```
+
+## Current Alerts
+
+2025-08-29 Illilouette Basin
+- [Scheduler](https://console.cron-job.org/jobs/6411246/history)
+- [Executions](https://github.com/haydenclev/permit-alert/actions/workflows/schedule.yml)
