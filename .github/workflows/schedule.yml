@@ -3,11 +3,14 @@ name: Check Permit Availability
 on:
   workflow_dispatch:        # Manual trigger for testing
   schedule:
-    - cron: '5 * * * *'     # Every 5 minutes
+    - cron: '* * * * *'     # Every minute (5min limit by Github)
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
+    env:
+      EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
 
     steps:
       - name: Checkout code
