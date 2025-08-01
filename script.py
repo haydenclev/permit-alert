@@ -100,7 +100,6 @@ def send_email_alert(permits):
 
 if __name__ == "__main__":
     STATE_FILE_PATH = sys.argv[1]
-    print(sys.argv)
     (permits, changes) = check_for_updates(API_URL)
     if changes:
         print("Permits available:", permits)
