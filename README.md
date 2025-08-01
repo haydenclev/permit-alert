@@ -7,8 +7,7 @@ This repo is to automate checking for wilderness permits via Recreation.gov
 Edit the following fields in `script.py` to configure your alert:
 - URL: edit the `start_date` and `end_date` fields for your desired timeframe. Note that the API seems to only accept entire month blocks.
 - START_DATE: the day you wish to begin your hike
-- MIN_COUNT: the minimum number of permits you want to alert for.
-- TH_MAPPING: the trailheads you would like to check. Retrieve this mapping from the recreation.gov website `features.json` network call.
+- DEFAULT_MAPPING: provides the starting state for the trailheads you want to monitor. Emails are sent on any changes observed. Retrieve the trailhead codes from the recreation.gov website `features.json` network call.
 
 ## Scheduling
 

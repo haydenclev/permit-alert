@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 import smtplib
 from email.message import EmailMessage
@@ -9,14 +10,20 @@ EMAIL_ALERTS = True
 EMAIL_FROM = "hayden.util@gmail.com"
 EMAIL_TO = "hayden.clev@gmail.com"
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
+STATE_FILE_NAME = "state.json"
 START_DATE = "2025-08-30"
-MIN_COUNT = 1
-TH_MAPPING = {
-    "Mono Meadow": "44585929",
-    "Ostrander (Lost Bear Meadow)": "44585934"
+DEFAULT_MAPPING = {
+    "44585929": {
+        "name": "Mono Meadow",
+        "available": 0,  
+    },
+    "44585934": {
+        "name": "Ostrander (Lost Bear Meadow)",
+        "available": 0,
+    }
 }
 
-def check_availability(url):
+def check_for_updates(url):
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
@@ -31,15 +38,44 @@ def check_availability(url):
     except Exception as e:
         print(f"/Error requesting permit information: {e}")
         return []
+    
+    permits = read_permit_state()
+    
+    updates = False
+    for code, trail in permits.items():
+        current = data[START_DATE][code]["quota_usage_by_member_daily"]["remaining"]
+        if current != trail["available"]:
+            updates = True
+            permits[code]["available"] = current
+            
+    if updates:
+        write_permit_state(permits)
 
-    available = []
-    for name, code in TH_MAPPING.items():
-        remaining = data[START_DATE][code]["quota_usage_by_member_daily"]["remaining"]
-        if remaining >= MIN_COUNT:
-            available.append((name, remaining))
+    return (permits, updates)
 
-    return available
+def read_permit_state():
+    if os.path.exists(STATE_FILE_NAME):
+        print(f"File '{STATE_FILE_NAME}' found. Loading data...")
+        try:
+            with open(STATE_FILE_NAME, 'r') as f:
+                return json.load(f)
+            print("Data loaded successfully.")
+        except json.JSONDecodeError:
+            print(f"Error: '{STATE_FILE_NAME}' is not a valid JSON file. Using default mapping.")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}. Using default mapping.")
+    else:
+        print(f"File '{STATE_FILE_NAME}' not found. Using default mapping.")
+    return DEFAULT_MAPPING
 
+def write_permit_state(permits):
+    print(f"Writing updated data to '{STATE_FILE_NAME}'...")
+    try:
+        with open(STATE_FILE_NAME, 'w') as f:
+            json.dump(permits, f, indent=4)
+        print("Data written successfully.")
+    except Exception as e:
+        print(f"An error occurred while writing to the file: {e}")
 
 def send_email_alert(permits):
     msg = EmailMessage()
@@ -47,8 +83,8 @@ def send_email_alert(permits):
     msg['From'] = EMAIL_FROM
     msg['To'] = EMAIL_TO
     body = "The following permits are available:\n\n"
-    for trailhead, available in permits:
-        body += f"- {trailhead}: {available} permits available\n"
+    for trail in permits.values():
+        body += f"- {trail["name"]}: {trail["available"]} permits available\n"
     body += "\nBook permits here: " + BOOKING_URL
     
     msg.set_content(body)
@@ -62,10 +98,10 @@ def send_email_alert(permits):
         print(f"Failed to send email: {e}")
 
 if __name__ == "__main__":
-    available = check_availability(API_URL)
-    if available:
-        print("Permits available:", available)
+    (permits, changes) = check_for_updates(API_URL)
+    if changes:
+        print("Permits available:", permits)
         if EMAIL_ALERTS:
-            send_email_alert(available)
+            send_email_alert(permits)
     else:
-        print("No permits available.")
+        print("No changes to permit availability.")
