@@ -32,7 +32,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Download state artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: state-artifact
           path: .
@@ -42,7 +42,7 @@ jobs:
         run: python script.py
 
       - name: Upload state artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: state-artifact
           path: state.json
