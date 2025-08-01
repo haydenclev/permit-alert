@@ -39,7 +39,9 @@ jobs:
           uv sync --no-dev
 
       - name: Run the script
-        run: python script.py .state/state.json
+        run: |
+          source .venv/bin/activate
+          python script.py .state/state.json
 
       - name: Commit and push state changes
         run: |
