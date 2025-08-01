@@ -45,7 +45,6 @@ jobs:
 
       - name: Commit and push state changes
         run: |
-          cd state-repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add state.json
