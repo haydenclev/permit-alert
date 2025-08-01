@@ -17,7 +17,7 @@ The example `curl` command below can be translated into cron-job UI:
 ```
 curl -X POST \
   -H "Accept: application/vnd.github+json" \
-  -H "Authorization: token ${GITHUB_PAT}" \
+  -H "Authorization: token ${GH_PAT}" \
   https://api.github.com/repos/haydenclev/permit-alert/actions/workflows/schedule.yml/dispatches \
   -d '{"ref": "main"}'
 ```
