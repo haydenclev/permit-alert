@@ -8,7 +8,7 @@ on:
         type: string
         default: 'UI'
 
-run-name: ${{ format('Check Permit Availability - triggered by {0}', github.event.client_payload && 'Cron Job' || 'UI') }}
+run-name: ${{ format('Check Permit Availability - {0}', github.event.inputs.trigger) }}
 
 jobs:
   run-script:
@@ -33,8 +33,3 @@ jobs:
 
       - name: Run the script
         run: python script.py
-
-      - name: Print inputs context
-        env:
-          INPUTS_CONTEXT: ${{ toJSON(github.event.inputs) }}
-        run: echo "$INPUTS_CONTEXT"
