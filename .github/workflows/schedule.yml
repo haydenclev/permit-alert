@@ -21,6 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout state branch
+        uses: actions/checkout@v4
+        with:
+          path: state-repo
+          ref: gh-actions-state
+          token: ${{ secrets.GH_PAT }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -31,19 +38,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download state artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: state-artifact
-          path: .
-          fail-on-unmatched-artifact: false
-
       - name: Run the script
-        run: python script.py
+        run: python main-repo/your_script.py --state-file state-repo/state.json
 
-      - name: Upload state artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: state-artifact
-          path: state.json
-          overwrite: true
+      - name: Commit and push state changes
+        run: |
+          cd state-repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add state.json
+          git commit -m "Update state.json from workflow run ${{ github.run_id }}"
+          git push
+        working-directory: ./state-repo

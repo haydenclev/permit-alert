@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import requests
 import smtplib
@@ -10,7 +11,7 @@ EMAIL_ALERTS = True
 EMAIL_FROM = "hayden.util@gmail.com"
 EMAIL_TO = "hayden.clev@gmail.com"
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
-STATE_FILE_NAME = "state.json"
+STATE_FILE_PATH = "state.json"
 START_DATE = "2025-08-30"
 DEFAULT_MAPPING = {
     "44585929": {
@@ -54,24 +55,24 @@ def check_for_updates(url):
     return (permits, updates)
 
 def read_permit_state():
-    if os.path.exists(STATE_FILE_NAME):
-        print(f"File '{STATE_FILE_NAME}' found. Loading data...")
+    if os.path.exists(STATE_FILE_PATH):
+        print(f"File '{STATE_FILE_PATH}' found. Loading data...")
         try:
-            with open(STATE_FILE_NAME, 'r') as f:
+            with open(STATE_FILE_PATH, 'r') as f:
                 return json.load(f)
             print("Data loaded successfully.")
         except json.JSONDecodeError:
-            print(f"Error: '{STATE_FILE_NAME}' is not a valid JSON file. Using default mapping.")
+            print(f"Error: '{STATE_FILE_PATH}' is not a valid JSON file. Using default mapping.")
         except Exception as e:
             print(f"An unexpected error occurred: {e}. Using default mapping.")
     else:
-        print(f"File '{STATE_FILE_NAME}' not found. Using default mapping.")
+        print(f"File '{STATE_FILE_PATH}' not found. Using default mapping.")
     return DEFAULT_MAPPING
 
 def write_permit_state(permits):
-    print(f"Writing updated data to '{STATE_FILE_NAME}'...")
+    print(f"Writing updated data to '{STATE_FILE_PATH}'...")
     try:
-        with open(STATE_FILE_NAME, 'w') as f:
+        with open(STATE_FILE_PATH, 'w') as f:
             json.dump(permits, f, indent=4)
         print("Data written successfully.")
     except Exception as e:
@@ -98,6 +99,7 @@ def send_email_alert(permits):
         print(f"Failed to send email: {e}")
 
 if __name__ == "__main__":
+    STATE_FILE_PATH = sys.argv[1]
     (permits, changes) = check_for_updates(API_URL)
     if changes:
         print("Permits available:", permits)
