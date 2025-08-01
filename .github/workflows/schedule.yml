@@ -41,10 +41,8 @@ jobs:
           pip install -r main-repo/requirements.txt
 
       - name: Run the script
-        run: |
-          ls main-repo
-          ls state-repo
-          python main-repo/script.py --state-file state-repo/state.json
+        run: python script.py --state-file ../state-repo/state.json
+        working-directory: ./main-repo
 
       - name: Commit and push state changes
         run: |
