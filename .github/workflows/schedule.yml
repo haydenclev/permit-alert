@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          uv sync -f
+          uv sync --no-dev
 
       - name: Run the script
         run: python script.py ../state-repo/state.json
