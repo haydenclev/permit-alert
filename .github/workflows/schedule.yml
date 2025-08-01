@@ -26,3 +26,8 @@ jobs:
 
       - name: Run the script
         run: python script.py
+
+      - name: Dump GitHub event context
+        env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: echo "$EVENT_CONTEXT"
