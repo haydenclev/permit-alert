@@ -31,12 +31,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # - name: Download state artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: state-artifact
-      #     path: .
-      #     fail-on-unmatched-artifact: false
+      - name: Download state artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: state-artifact
+          path: .
+          fail-on-unmatched-artifact: false
 
       - name: Run the script
         run: python script.py

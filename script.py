@@ -48,8 +48,8 @@ def check_for_updates(url):
             updates = True
             permits[code]["available"] = current
             
-    # if updates:
-    write_permit_state(permits)
+    if updates:
+        write_permit_state(permits)
 
     return (permits, updates)
 
