@@ -20,13 +20,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          path: main-repo
 
       - name: Checkout state branch
         uses: actions/checkout@v4
         with:
-          path: state-repo
+          path: .state
           ref: gh-actions-state
           token: ${{ secrets.GH_PAT }}
 
@@ -41,8 +39,7 @@ jobs:
           uv sync --no-dev
 
       - name: Run the script
-        run: python script.py ../state-repo/state.json
-        working-directory: ./main-repo
+        run: python script.py .state/state.json
 
       - name: Commit and push state changes
         run: |
@@ -56,4 +53,4 @@ jobs:
           else
             echo "No changes to commit."
           fi
-        working-directory: ./state-repo
+        working-directory: .state
