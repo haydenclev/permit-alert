@@ -36,5 +36,5 @@ jobs:
 
       - name: Print inputs context
         env:
-          INPUTS_CONTEXT: ${{ toJSON(inputs) }}
+          INPUTS_CONTEXT: ${{ toJSON(github.event.inputs) }}
         run: echo "$INPUTS_CONTEXT"
