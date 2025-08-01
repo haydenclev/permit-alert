@@ -6,7 +6,7 @@ import smtplib
 from email.message import EmailMessage
 
 API_URL = "https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false"
-BOOKING_URL = "https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit"
+WEB_URL = "https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit"
 EMAIL_ALERTS = True
 EMAIL_FROM = "hayden.util@gmail.com"
 EMAIL_TO = "hayden.clev@gmail.com"
@@ -16,13 +16,14 @@ START_DATE = "2025-08-30"
 DEFAULT_MAPPING = {
     "44585929": {
         "name": "Mono Meadow",
-        "available": 0,  
+        "available": 0,
     },
     "44585934": {
         "name": "Ostrander (Lost Bear Meadow)",
         "available": 0,
-    }
+    },
 }
+
 
 def check_for_updates(url):
     try:
@@ -35,30 +36,31 @@ def check_for_updates(url):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         data = response.json()["payload"]
-    
+
     except Exception as e:
         print(f"/Error requesting permit information: {e}")
         return []
-    
+
     permits = read_permit_state()
-    
+
     updates = False
     for code, trail in permits.items():
         current = data[START_DATE][code]["quota_usage_by_member_daily"]["remaining"]
         if current != trail["available"]:
             updates = True
             permits[code]["available"] = current
-            
+
     if updates:
         write_permit_state(permits)
 
     return (permits, updates)
 
+
 def read_permit_state():
     if os.path.exists(STATE_FILE_PATH):
         print(f"File '{STATE_FILE_PATH}' found. Loading data...")
         try:
-            with open(STATE_FILE_PATH, 'r') as f:
+            with open(STATE_FILE_PATH, "r") as f:
                 return json.load(f)
             print("Data loaded successfully.")
         except json.JSONDecodeError:
@@ -69,34 +71,37 @@ def read_permit_state():
         print(f"File '{STATE_FILE_PATH}' not found. Using default mapping.")
     return DEFAULT_MAPPING
 
+
 def write_permit_state(permits):
     print(f"Writing updated data to '{STATE_FILE_PATH}'...")
     try:
-        with open(STATE_FILE_PATH, 'w') as f:
+        with open(STATE_FILE_PATH, "w") as f:
             json.dump(permits, f, indent=4)
         print("Data written successfully.")
     except Exception as e:
         print(f"An error occurred while writing to the file: {e}")
 
+
 def send_email_alert(permits):
     msg = EmailMessage()
-    msg['Subject'] = '🎒 Permit Available on Recreation.gov'
-    msg['From'] = EMAIL_FROM
-    msg['To'] = EMAIL_TO
+    msg["Subject"] = "🎒 Permit Available on Recreation.gov"
+    msg["From"] = EMAIL_FROM
+    msg["To"] = EMAIL_TO
     body = "The following permits are available:\n\n"
     for trail in permits.values():
         body += f"- {trail['name']}: {trail['available']} permits available\n"
-    body += "\nBook permits here: " + BOOKING_URL
-    
+    body += "\nBook permits here: " + WEB_URL
+
     msg.set_content(body)
 
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
             smtp.login(EMAIL_FROM, EMAIL_PASS)
             smtp.send_message(msg)
         print("Alert email sent.")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
 
 if __name__ == "__main__":
     STATE_FILE_PATH = sys.argv[1]

@@ -1,0 +1,18 @@
+[project]
+name = "permit-alerts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.32.4",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "ruff>=0.12.7",
+]
+
+[tool.ruff]
+  line-length = 100 # Set your desired line length here
