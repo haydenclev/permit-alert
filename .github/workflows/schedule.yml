@@ -36,5 +36,5 @@ jobs:
 
       - name: print inputs
         env:
-          INPUTS: ${{ inputs }}
-        run: ${{ echo $INPUTS }}
+          ASDF: ${{ inputs }}
+        run: ${{ echo $ASDF }}
