@@ -84,7 +84,7 @@ def send_email_alert(permits):
     msg['To'] = EMAIL_TO
     body = "The following permits are available:\n\n"
     for trail in permits.values():
-        body += f"- {trail["name"]}: {trail["available"]} permits available\n"
+        body += f"- {trail['name']}: {trail['available']} permits available\n"
     body += "\nBook permits here: " + BOOKING_URL
     
     msg.set_content(body)
