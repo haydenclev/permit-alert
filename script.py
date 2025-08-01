@@ -10,7 +10,7 @@ EMAIL_FROM = "hayden.util@gmail.com"
 EMAIL_TO = "hayden.clev@gmail.com"
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
 START_DATE = "2025-08-30"
-MIN_COUNT = 3
+MIN_COUNT = 1
 TH_MAPPING = {
     "Mono Meadow": "44585929",
     "Ostrander (Lost Bear Meadow)": "44585934"
