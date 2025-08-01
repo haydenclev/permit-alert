@@ -34,7 +34,7 @@ jobs:
       - name: Run the script
         run: python script.py
 
-      - name: print inputs
+      - name: Print inputs context
         env:
-          ASDF: ${{ inputs }}
-        run: ${{ echo $ASDF }}
+          INPUTS_CONTEXT: ${{ toJSON(inputs) }}
+        run: echo "$INPUTS_CONTEXT"
