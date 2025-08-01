@@ -2,6 +2,13 @@ name: Check Permit Availability
 
 on:
   workflow_dispatch:        # Manual trigger for GitHub UI and POST requests
+    inputs:
+      trigger:
+        description: 'Enhances UI display with where job triggered from'
+        type: string
+        default: 'UI'
+
+run-name: ${{ format('Check Permit Availability - triggered by {0}', inputs.trigger) }}
 
 jobs:
   run-script:
@@ -26,8 +33,3 @@ jobs:
 
       - name: Run the script
         run: python script.py
-
-      - name: Dump GitHub event context
-        env:
-          EVENT_CONTEXT: ${{ toJSON(github.event) }}
-        run: echo "$EVENT_CONTEXT"
