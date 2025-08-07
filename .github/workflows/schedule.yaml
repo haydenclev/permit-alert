@@ -4,11 +4,11 @@ on:
   workflow_dispatch:        # Manual trigger for GitHub UI and POST requests
     inputs:
       trigger:
-        description: 'Enhances UI display with where job triggered from'
+        description: 'Job trigger'
         type: string
         default: 'UI'
       config:
-        description: 'YAML config as string input'
+        description: 'Config object in JSON format'
         type: string
         required: true
 
