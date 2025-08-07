@@ -44,7 +44,7 @@ jobs:
 
       - name: Write config.yaml from workflow input
         run: |
-          echo "${{ github.event.inputs.config }}" > config.yaml
+          echo '${{ github.event.inputs.config }}' | yq -P e - > config.yaml
 
       - name: Run the script
         run: |
