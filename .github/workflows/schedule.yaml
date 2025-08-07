@@ -7,6 +7,10 @@ on:
         description: 'Enhances UI display with where job triggered from'
         type: string
         default: 'UI'
+      config:
+        description: 'YAML config as string input'
+        type: string
+        required: true
 
 run-name: ${{ format('Check Permit Availability - {0}', github.event.inputs.trigger) }}
 
@@ -15,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+      EMAIL_PASS: ${{ secrets.EMAIL_PWD }}
 
     steps:
       - name: Checkout code
@@ -38,10 +42,14 @@ jobs:
           pip install uv
           uv sync --no-dev
 
+      - name: Write config.yaml from workflow input
+        run: |
+          echo "${{ github.event.inputs.config }}" > config.yaml
+
       - name: Run the script
         run: |
           source .venv/bin/activate
-          python script.py .state/state.json
+          python script.py
 
       - name: Commit and push state changes
         run: |
