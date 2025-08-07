@@ -61,7 +61,7 @@ Example `curl` command below:
 curl -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: token ${GH_PAT}" \
-  https://api.github.com/repos/haydenclev/permit-alert/actions/workflows/schedule.yml/dispatches \
+  https://api.github.com/repos/${GH_USR}$/permit-alert/actions/workflows/schedule.yml/dispatches \
     -d '{
     "ref": "main",
     "inputs": {
