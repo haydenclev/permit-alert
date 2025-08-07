@@ -1,28 +1,23 @@
 import os
-import sys
 import json
+import yaml
 import requests
 import smtplib
 from email.message import EmailMessage
+from pydantic import BaseModel
 
-API_URL = "https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false"
-WEB_URL = "https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit"
-EMAIL_ALERTS = True
-EMAIL_FROM = "hayden.util@gmail.com"
-EMAIL_TO = "hayden.clev@gmail.com"
-EMAIL_PASS = os.environ.get("EMAIL_PASS")
-STATE_FILE_PATH = "state.json"
-START_DATE = "2025-08-30"
-DEFAULT_MAPPING = {
-    "44585929": {
-        "name": "Mono Meadow",
-        "available": 0,
-    },
-    "44585934": {
-        "name": "Ostrander (Lost Bear Meadow)",
-        "available": 0,
-    },
-}
+config = {}
+
+
+class Config(BaseModel):
+    api_url: str
+    web_url: str
+    start_date: str
+    state_file: str
+    default_state: object
+    email_alerts: bool
+    email_from: str
+    email_to: str
 
 
 def check_for_updates(url):
@@ -39,43 +34,43 @@ def check_for_updates(url):
 
     except Exception as e:
         print(f"/Error requesting permit information: {e}")
-        return []
+        return ()
 
     permits = read_permit_state()
 
     updates = False
     for code, trail in permits.items():
-        current = data[START_DATE][code]["quota_usage_by_member_daily"]["remaining"]
+        current = data[config.start_date][code]["quota_usage_by_member_daily"]["remaining"]
         if current != trail["available"]:
             updates = True
             permits[code]["available"] = current
 
-    if updates:
+    if updates or not os.path.exists(config.state_file):
         write_permit_state(permits)
 
     return (permits, updates)
 
 
 def read_permit_state():
-    if os.path.exists(STATE_FILE_PATH):
-        print(f"File '{STATE_FILE_PATH}' found. Loading data...")
+    if os.path.exists(config.state_file):
+        print(f"File '{config.state_file}' found. Loading data...")
         try:
-            with open(STATE_FILE_PATH, "r") as f:
+            with open(config.state_file, "r") as f:
                 return json.load(f)
             print("Data loaded successfully.")
         except json.JSONDecodeError:
-            print(f"Error: '{STATE_FILE_PATH}' is not a valid JSON file. Using default mapping.")
+            print(f"Error: '{config.state_file}' is not a valid JSON file. Using default mapping.")
         except Exception as e:
             print(f"An unexpected error occurred: {e}. Using default mapping.")
     else:
-        print(f"File '{STATE_FILE_PATH}' not found. Using default mapping.")
-    return DEFAULT_MAPPING
+        print(f"File '{config.state_file}' not found. Using default mapping.")
+    return config.default_state
 
 
 def write_permit_state(permits):
-    print(f"Writing updated data to '{STATE_FILE_PATH}'...")
+    print(f"Writing updated data to '{config.state_file}'...")
     try:
-        with open(STATE_FILE_PATH, "w") as f:
+        with open(config.state_file, "w") as f:
             json.dump(permits, f, indent=4)
         print("Data written successfully.")
     except Exception as e:
@@ -85,18 +80,18 @@ def write_permit_state(permits):
 def send_email_alert(permits):
     msg = EmailMessage()
     msg["Subject"] = "🎒 Permit Available on Recreation.gov"
-    msg["From"] = EMAIL_FROM
-    msg["To"] = EMAIL_TO
+    msg["From"] = config.email_from
+    msg["To"] = config.email_to
     body = "The following permits are available:\n\n"
     for trail in permits.values():
         body += f"- {trail['name']}: {trail['available']} permits available\n"
-    body += "\nBook permits here: " + WEB_URL
+    body += "\nBook permits here: " + config.web_url
 
     msg.set_content(body)
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(EMAIL_FROM, EMAIL_PASS)
+            smtp.login(config.email_from, os.environ.get("EMAIL_PWD"))
             smtp.send_message(msg)
         print("Alert email sent.")
     except Exception as e:
@@ -104,11 +99,12 @@ def send_email_alert(permits):
 
 
 if __name__ == "__main__":
-    STATE_FILE_PATH = sys.argv[1]
-    (permits, changes) = check_for_updates(API_URL)
+    with open("config.yaml") as stream:
+        config = Config(**yaml.safe_load(stream))
+    (permits, changes) = check_for_updates(config.api_url)
     if changes:
         print("Permits available:", permits)
-        if EMAIL_ALERTS:
+        if config.email_alerts:
             send_email_alert(permits)
     else:
         print("No changes to permit availability.")

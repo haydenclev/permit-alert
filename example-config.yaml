@@ -1,0 +1,28 @@
+# The URL to query for permit availability.
+api_url: https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false
+# URL to link to booking page for email alert.
+web_url: https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit
+# The day you plan to start your hike.
+start_date: 2025-08-30
+# Path to permit state file. `state.json` is recommended.
+state_file: state.json
+# Holds permit availability information.
+default_state: {
+    # Trailhead code. Inspect network tab on recreation.gov and look for `features.json` call.
+    44585929: {
+        # Trailhead name.
+        name: Mono Meadow,
+        # Current number of available permits.
+        available: 0,
+    },
+    44585934: {
+        name: Ostrander (Lost Bear Meadow),
+        available: 0,
+    },
+}
+# Enable or disable sending email alerts when permit availability changes.
+email_alerts: True
+# Sending email. Only used if email_alerts set to True.
+email_from: foo@gmail.com
+# Receiving email. Only used if email_alerts set to True.
+email_to: bar@gmail.com
