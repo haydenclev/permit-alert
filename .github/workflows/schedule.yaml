@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      EMAIL_PASS: ${{ secrets.EMAIL_PWD }}
+      EMAIL_PWD: ${{ secrets.EMAIL_PWD }}
 
     steps:
       - name: Checkout code
