@@ -15,7 +15,7 @@ email_alerts: bool
 email_from: str
 email_to: str
 ```
-Also see `example-config.yaml` for additional information.
+See `example-config.yaml` for additional information.
 
 To enable email alerts you will need to create an [app password](https://support.google.com/mail/answer/185833?hl=en) and add it to a `.env` file like so:
 ```
@@ -45,32 +45,24 @@ To trigger the workflow via the API you will need to create a personal access to
 
 ### Repository Secrets
 
-To access secrets like your personal access token and email password you will need to add them as repository secrets. Follow instructions [here](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets). Be sure to use the keys `GH_PAT` and `EMAIL_PWD`.
+To access variables like your personal access token and email password you will need to add them as repository secrets. Follow instructions [here](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets). Be sure to use the keys `GH_PAT` and `EMAIL_PWD`.
 
 ### Scheduling
 
-The workflow can be triggered several ways including manually through the UI (great for testing), through a Github Actions scheduler (problematic), and also (and most importantly) through a HTTP POST request.
-Github claims that they provide scheduling at 5min intervals, but in practice this is unreliable and can have gaps in execution in excess of one hour. Instead, it is best to use a free online cron job scheduler such as [cron-job.org](cron-job.org) to manually trigger the action via a POST call.
+The workflow can be triggered several ways including manually through the UI (great for testing), through a Github Actions scheduler (problematic), and also through a HTTP POST request (most reliable).
+Github Actions claims that they provide scheduling at 5min intervals, but in practice this is unreliable and can have gaps in execution in excess of one hour. Instead, it is best to use a free online cron job scheduler such as [cron-job.org](cron-job.org) to manually trigger the action via a POST call.
 
-The request itself should include the following input fields:
+The request itself should include the following input fields in JSON format:
 - `trigger`: Triggering mechanism (e.g. UI or Cron Job). Used to enhance the Github UI.
-- `config`: Configuration object similar to that when running locally, but with a different path for the `state_file`. Example request is provided below.
+- `config`: Configuration object similar to that when running locally, but in JSON and a different path for the `state_file`. Example request is provided below.
 
 Example `curl` command below:
 ```
-curl -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: token ${GH_PAT}" \
-  https://api.github.com/repos/${GH_USR}$/permit-alert/actions/workflows/schedule.yml/dispatches \
-    -d '{
-    "ref": "main",
-    "inputs": {
-      "trigger": "API",
-      "config": "api_url: \"https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false\"\nweb_url: \"https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit\"\nstart_date: \"2025-08-30\"\nstate_file: \"state.json\"\ndefault_state:\n  44585929:\n    name: \"Mono Meadow\"\n    available: 0\n  44585934:\n    name: \"Ostrander (Lost Bear Meadow)\"\n    available: 0\nemail_alerts: true\nemail_from: \"${sender@gmail.com}$\"\nemail_to: \"${receiver@gmail.com}$\""
-    }
-  }'
-    }
-  }'
+curl -X POST 
+-H "Accept: application/vnd.github.v3+json"
+-H "Authorization: token {github-personal-access-token}"
+-H "Content-Type: application/json"
+--data '{"ref":"main","inputs":{"trigger":"Cron Job","config":"{\"api_url\":\"https://www.recreation.gov/api/permitinyo/445859/availabilityv2?start_date=2025-08-01&end_date=2025-08-31&commercial_acct=false\",\"web_url\":\"https://www.recreation.gov/permits/445859/registration/detailed-availability?date=2025-08-29&type=overnight-permit\",\"start_date\":\"2025-08-30\",\"state_file\":\".state/state.json\",\"default_state\":{\"44585929\":{\"name\":\"Mono Meadow\",\"available\":0},\"44585934\":{\"name\":\"Ostrander (Lost Bear Meadow)\",\"available\":0}},\"email_alerts\":true,\"email_from\":\"from@gmail.com\",\"email_to\":\"to@gmail.com\"}"}}' https://api.github.com/repos/{github-username}/{github-repo-name}/actions/workflows/schedule.yml/dispatches 
 ```
 
 ## Limitations
