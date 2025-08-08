@@ -9,13 +9,13 @@ state_file: state.json
 # Holds permit availability information.
 default_state: {
     # Trailhead code. Inspect network tab on recreation.gov and look for `features.json` call.
-    44585929: {
+    "44585929": {
         # Trailhead name.
         name: Mono Meadow,
         # Current number of available permits.
         available: 0,
     },
-    44585934: {
+    "44585934": {
         name: Ostrander (Lost Bear Meadow),
         available: 0,
     },
