@@ -3,6 +3,7 @@ import json
 import yaml
 import requests
 import smtplib
+from dotenv import load_dotenv
 from email.message import EmailMessage
 from pydantic import BaseModel
 
@@ -101,6 +102,7 @@ def send_email_alert(permits) -> None:
 
 
 if __name__ == "__main__":
+    load_dotenv()
     (permits, changes) = check_for_updates(config.api_url)
     if changes:
         print("Permits available:", permits)
