@@ -36,17 +36,20 @@ def check_for_updates(url) -> tuple:
         data = response.json()["payload"]
 
     except Exception as e:
-        print(f"/Error requesting permit information: {e}")
+        print(f"Error requesting permit information: {e}")
         return ()
 
     permits = read_permit_state()
 
-    updates = False
-    for code, trail in permits.items():
-        current = data[config.start_date][code]["quota_usage_by_member_daily"]["remaining"]
-        if current != trail["available"]:
-            updates = True
-            permits[code]["available"] = current
+    try:
+        updates = False
+        for trail, info in permits.items():
+            current = data[config.start_date][trail]["quota_usage_by_member_daily"]["remaining"]
+            if current != info["available"]:
+                updates = True
+                permits[trail]["available"] = current
+    except KeyError as e:
+        handle_permit_availability_error(e, data, config, trail)
 
     if updates or not os.path.exists(config.state_file):
         write_permit_state(permits)
@@ -99,6 +102,28 @@ def send_email_alert(permits) -> None:
         print("Alert email sent.")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+
+def handle_permit_availability_error(e, data, config, trail) -> None:
+    missing_key = e.args[0]
+    if missing_key == config.start_date:
+        print(f"Date is missing from response object: {missing_key}")
+        print(f"\tKeys: {data.keys()}")
+    elif missing_key == trail:
+        print(
+            f"Trailhead is missing from response object: {missing_key} - {config.default_state[missing_key]['name']}"
+        )
+        print(f"\tKeys: {data[config.start_date].keys()}")
+    elif missing_key == "quota_usage_by_member_daily":
+        print("Quota missing from response object:")
+        print(f"\tKeys: {data[config.start_date][trail].keys()}")
+    elif missing_key == "remaining":
+        print("Remaining missing from response object:")
+        print(f"\tKeys: {data[config.start_date]['quota_usage_by_member_daily'].keys()}")
+    else:
+        print(f"Error reading current permit availability for key: {missing_key}")
+        print(f"\tConfig: {config}")
+        print(f"\tData: {json.dumps(data, indent=4)}")
 
 
 if __name__ == "__main__":
